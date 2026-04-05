@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>시계</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #0f0f1a;
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+    }
+
+    .clock-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    /* ── Analog Clock ── */
+    .analog {
+      position: relative;
+      width: 260px;
+      height: 260px;
+    }
+
+    .analog svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 24px rgba(99, 179, 237, 0.35));
+    }
+
+    /* ── Digital Clock ── */
+    .digital {
+      font-size: 3.5rem;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.08em;
+      color: #63b3ed;
+      text-shadow: 0 0 20px rgba(99, 179, 237, 0.6);
+    }
+
+    /* ── Date ── */
+    .date {
+      font-size: 1rem;
+      color: #a0aec0;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+<div class="clock-wrapper">
+  <!-- Analog -->
+  <div class="analog">
+    <svg viewBox="0 0 200 200" id="analogSvg">
+      <!-- face -->
+      <circle cx="100" cy="100" r="96" fill="#1a1a2e" stroke="#63b3ed" stroke-width="3"/>
+      <!-- hour ticks -->
+      <g id="ticks"></g>
+      <!-- hands -->
+      <line id="hourHand"   x1="100" y1="100" x2="100" y2="40"  stroke="#e2e8f0" stroke-width="6"  stroke-linecap="round"/>
+      <line id="minuteHand" x1="100" y1="100" x2="100" y2="22"  stroke="#90cdf4" stroke-width="4"  stroke-linecap="round"/>
+      <line id="secondHand" x1="100" y1="110" x2="100" y2="18"  stroke="#fc8181" stroke-width="2"  stroke-linecap="round"/>
+      <!-- center dot -->
+      <circle cx="100" cy="100" r="5" fill="#fc8181"/>
+    </svg>
+  </div>
+
+  <!-- Digital -->
+  <div class="digital" id="digitalClock">00:00:00</div>
+
+  <!-- Date -->
+  <div class="date" id="dateDisplay"></div>
+</div>
+
+<script>
+  // Draw hour ticks
+  const svg = document.getElementById('analogSvg');
+  const ticksGroup = document.getElementById('ticks');
+  for (let i = 0; i < 60; i++) {
+    const angle = (i / 60) * 2 * Math.PI - Math.PI / 2;
+    const isHour = i % 5 === 0;
+    const outerR = 94;
+    const innerR = isHour ? 80 : 88;
+    const x1 = 100 + outerR * Math.cos(angle);
+    const y1 = 100 + outerR * Math.sin(angle);
+    const x2 = 100 + innerR * Math.cos(angle);
+    const y2 = 100 + innerR * Math.sin(angle);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+    line.setAttribute('stroke', isHour ? '#63b3ed' : '#4a5568');
+    line.setAttribute('stroke-width', isHour ? '2' : '1');
+    ticksGroup.appendChild(line);
+  }
+
+  function rotate(element, cx, cy, deg) {
+    element.setAttribute('transform', `rotate(${deg}, ${cx}, ${cy})`);
+  }
+
+  const DAYS = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+
+  function tick() {
+    const now = new Date();
+    const h = now.getHours();
+    const m = now.getMinutes();
+    const s = now.getSeconds();
+    const ms = now.getMilliseconds();
+
+    // Smooth second hand
+    const secDeg  = (s + ms / 1000) * 6;
+    const minDeg  = (m + s / 60) * 6;
+    const hourDeg = ((h % 12) + m / 60) * 30;
+
+    rotate(document.getElementById('hourHand'),   100, 100, hourDeg);
+    rotate(document.getElementById('minuteHand'), 100, 100, minDeg);
+    rotate(document.getElementById('secondHand'), 100, 100, secDeg);
+
+    // Digital
+    const hh = String(h).padStart(2, '0');
+    const mm = String(m).padStart(2, '0');
+    const ss = String(s).padStart(2, '0');
+    document.getElementById('digitalClock').textContent = `${hh}:${mm}:${ss}`;
+
+    // Date
+    const dateStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${DAYS[now.getDay()]}`;
+    document.getElementById('dateDisplay').textContent = dateStr;
+  }
+
+  tick();
+  setInterval(tick, 50);
+</script>
+</body>
+</html>
