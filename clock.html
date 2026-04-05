@@ -25,6 +25,24 @@
       height: 100%;
       filter: drop-shadow(0 0 24px rgba(99, 179, 237, 0.35));
     }
+
+    .download-btn {
+      margin-top: 24px;
+      padding: 10px 24px;
+      background: transparent;
+      border: 2px solid #63b3ed;
+      color: #63b3ed;
+      font-size: 0.95rem;
+      border-radius: 8px;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .download-btn:hover {
+      background: #63b3ed;
+      color: #0f0f1a;
+    }
   </style>
 </head>
 <body>
@@ -38,6 +56,8 @@
     <circle cx="100" cy="100" r="5" fill="#fc8181"/>
   </svg>
 </div>
+
+<button class="download-btn" onclick="downloadHTML()">HTML 다운로드</button>
 
 <script>
   const ticksGroup = document.getElementById('ticks');
@@ -68,6 +88,15 @@
 
   tick();
   setInterval(tick, 50);
+
+  function downloadHTML() {
+    const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'clock.html';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
 </script>
 </body>
 </html>
